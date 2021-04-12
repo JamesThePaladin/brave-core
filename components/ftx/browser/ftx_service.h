@@ -1,7 +1,7 @@
-/* Copyright (c) 2020 The Brave Authors. All rights reserved.
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/. */
+// Copyright (c) 2021 The Brave Authors. All rights reserved.
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this file,
+// you can obtain one at http://mozilla.org/MPL/2.0/.
 
 #ifndef BRAVE_COMPONENTS_FTX_BROWSER_FTX_SERVICE_H_
 #define BRAVE_COMPONENTS_FTX_BROWSER_FTX_SERVICE_H_
@@ -43,12 +43,19 @@ const char get_market_data_path[] = "/api/markets";
 const char oauth_path[] = "/oauth";
 const char oauth_token_path[] = "/api/oauth/token";
 const char oauth_balances_path[] = "/api/wallet/balances";
-const char oauth_quote_path[] = "/otc/quotes";
+const char oauth_quote_path[] = "/api/otc/quotes";
 const char futures_filter[] = "perpetual";
 
-typedef std::vector<std::map<std::string, std::string>> FTXChartData;
-typedef std::vector<std::map<std::string, std::string>> FTXFuturesData;
-typedef std::map<std::string, std::string> FTXAccountBalances;
+struct TokenPriceData {
+  std::string symbol;
+  double price;
+  double percentChangeDay;
+  double volumeDay;
+};
+
+typedef std::vector<std::map<std::string, double>> FTXChartData;
+typedef std::vector<TokenPriceData> FTXFuturesData;
+typedef std::map<std::string, double> FTXAccountBalances;
 
 class FTXService : public KeyedService {
  public:
@@ -83,8 +90,9 @@ class FTXService : public KeyedService {
   bool ExecuteConvertQuote(const std::string& quote_id,
                            ExecuteConvertQuoteCallback callback);
   std::string GetOAuthClientUrl();
-  bool GetAccessToken(GetAccessTokenCallback callback);
-  void SetAuthToken(const std::string& auth_token);
+  bool GetAccessToken(const std::string& auth_token,
+                      GetAccessTokenCallback callback);
+  void ClearAuth();
 
  private:
   using SimpleURLLoaderList =
@@ -124,19 +132,15 @@ class FTXService : public KeyedService {
   bool NetworkRequest(const GURL& url,
                       const std::string& method,
                       const std::string& post_data,
+                      const std::string& post_data_type,
                       URLRequestCallback callback,
                       bool set_auth_header);
   void OnURLLoaderComplete(SimpleURLLoaderList::iterator iter,
                            URLRequestCallback callback,
                            const std::unique_ptr<std::string> response_body);
-  void OnGetAccessToken(GetAccessTokenCallback callback,
-                        const int status,
-                        const std::string& body,
-                        const std::map<std::string, std::string>& headers);
 
   scoped_refptr<base::SequencedTaskRunner> io_task_runner_;
 
-  std::string auth_token_;
   std::string access_token_;
   std::string client_id_;
   std::string client_secret_;

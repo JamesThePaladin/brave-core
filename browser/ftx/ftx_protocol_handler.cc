@@ -61,11 +61,23 @@ void LoadNewTabURL(const GURL& url,
     std::string auth_token = parts["code"];
     Profile* profile =
         Profile::FromBrowserContext(web_contents->GetBrowserContext());
-    FTXServiceFactory::GetInstance()->GetForProfile(profile)->SetAuthToken(
-        auth_token);
-  }
+    FTXServiceFactory::GetInstance()->GetForProfile(profile)->GetAccessToken(
+        auth_token,
+        base::BindOnce([] (bool success) {
+          LOG(ERROR) << "FTX: protocol handler received "
+              << (success ? "success" : "fail");
+        }));
 
-  web_contents->GetController().LoadURL(GURL("chrome://newtab?ftxAuth=1"),
+  } else {
+    LOG(ERROR) << "FTX: could not get code from callback";
+    // Handle failure
+    web_contents->GetController().LoadURL(GURL("chrome://newtab?ftxAuthError"),
+                                      content::Referrer(), page_transition,
+                                      std::string());
+    return;
+  }
+  // Handle success
+  web_contents->GetController().LoadURL(GURL("chrome://newtab?ftxAuthSuccess"),
                                         content::Referrer(), page_transition,
                                         std::string());
 }

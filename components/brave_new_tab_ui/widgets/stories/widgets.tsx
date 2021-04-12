@@ -8,8 +8,8 @@ import { withKnobs } from '@storybook/addon-knobs'
 
 // Components
 import { NewWidgetTooltip } from '../shared/newWidgetTooltip'
-import ftxLogo from '../ftx/ftx-logo.png'
-import bannerImage from '../../../containers/newTab/settings/assets/crypto-dot-com.png'
+import ftxLogo from '../ftx/components/ftx-logo.png'
+import bannerImage from '../../containers/newTab/settings/assets/crypto-dot-com.png'
 
 storiesOf('New Tab/Widgets', module)
   .addDecorator(withKnobs)

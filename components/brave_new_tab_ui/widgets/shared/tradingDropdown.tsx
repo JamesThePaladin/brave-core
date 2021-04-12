@@ -4,13 +4,12 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 
 import * as React from 'react'
+import { CaratDownIcon } from 'brave-ui/components/icons'
 import {
   TradeWrapper,
   InputWrapper,
   AmountInputField,
   Dropdown,
-  ActionsWrapper,
-  ActionButton,
   AssetDropdownLabel,
   AssetItems,
   AssetItem,
@@ -18,33 +17,33 @@ import {
   CaratDropdown,
   BasicBox
 } from './styles'
-import { CaratDownIcon } from 'brave-ui/components/icons'
-import icons from '../shared/assets/icons'
+import IconAsset from './iconAsset'
 
 const renderIconAsset = (key: string) => {
-  if (!(key in icons)) {
-    return null
-  }
-
-  return (
-    <>
-      <img height={20} src={icons[key]} />
-    </>
-  )
+  return <IconAsset iconKey={key} size={20} />
 }
 
 interface Props {
-  assets: Array<string>
+  fromAssets: string[]
+  toAssets: string[]
+  onChange: (from: string, to: string, quantity: number) => unknown
 }
 
 export const TradingDropdown = ({
-  assets
+  fromAssets,
+  toAssets,
+  onChange
 }: Props) => {
   const [fromDropdownShowing, setFromDropdown] = React.useState(false)
   const [toDropdownShowing, setToDropdown] = React.useState(false)
-  const [currentQuantity, setCurrentQuantity] = React.useState('')
-  const [fromAsset, setFromAsset] = React.useState('BTC')
-  const [toAsset, setToAsset] = React.useState('BAT')
+  const [currentQuantity, setCurrentQuantity] = React.useState<string>()
+  const [fromAsset, setFromAsset] = React.useState(fromAssets.length ? fromAssets[0] : '')
+
+  const toAssetsFiltered = React.useMemo(() => {
+    return toAssets.filter(name => name !== fromAsset)
+  }, [toAssets, fromAsset])
+
+  const [toAsset, setToAsset] = React.useState(toAssetsFiltered.length ? toAssetsFiltered[0] : '')
 
   const toggleDropDowns = (dropdown: string) => {
     if (dropdown === 'to') {
@@ -66,8 +65,17 @@ export const TradingDropdown = ({
 
   const handleChange = ({ target }: any) => {
     const { value } = target
+    // Validate
+    if (Number.isNaN(Number(value))) {
+      return
+    }
+    // Commit
     setCurrentQuantity(value)
   }
+
+  React.useEffect(() => {
+    onChange(fromAsset, toAsset, Number(currentQuantity) || 0)
+  }, [fromAsset, toAsset, currentQuantity, onChange])
 
   return (
     <>
@@ -93,7 +101,7 @@ export const TradingDropdown = ({
           {
             fromDropdownShowing
               ? <AssetItems>
-                {assets.filter(v => v !== fromAsset).map((asset: string, i: number, filteredAssets: string[]) => {
+                {fromAssets.filter(v => v !== fromAsset).map((asset: string, i: number, filteredAssets: string[]) => {
                   return (
                     <AssetItem
                       key={`choice-${asset}`}
@@ -133,7 +141,7 @@ export const TradingDropdown = ({
           {
             toDropdownShowing
               ? <AssetItems>
-                {assets.filter(v => v !== toAsset).map((asset: string, i: number, filteredAssets: string[]) => {
+                {toAssetsFiltered.filter(v => v !== toAsset).map((asset: string, i: number, filteredAssets: string[]) => {
                   return (
                     <AssetItem
                       key={`choice-${asset}`}
@@ -152,11 +160,6 @@ export const TradingDropdown = ({
           }
         </InputWrapper>
       </TradeWrapper>
-      <ActionsWrapper>
-        <ActionButton>
-          Preview Conversion
-        </ActionButton>
-      </ActionsWrapper>
     </>
   )
 }

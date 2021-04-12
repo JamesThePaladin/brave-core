@@ -69,14 +69,12 @@ class FtxGetClientUrlFunction : public ExtensionFunction {
   ResponseAction Run() override;
 };
 
-class FtxGetAccessTokenFunction : public ExtensionFunction {
+class FtxDisconnectFunction : public ExtensionFunction {
  public:
-  DECLARE_EXTENSION_FUNCTION("ftx.getAccessToken", UNKNOWN)
+  DECLARE_EXTENSION_FUNCTION("ftx.disconnect", UNKNOWN)
 
  protected:
-  ~FtxGetAccessTokenFunction() override {}
-  void OnCodeResult(bool success);
-
+  ~FtxDisconnectFunction() override {}
   ResponseAction Run() override;
 };
 

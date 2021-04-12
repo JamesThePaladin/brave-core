@@ -58,11 +58,12 @@ ExtensionFunction::ResponseAction FtxGetFuturesDataFunction::Run() {
 void FtxGetFuturesDataFunction::OnFuturesData(const FTXFuturesData& data) {
   base::ListValue result;
 
-  for (const auto& data_point : data) {
+  for (const TokenPriceData& currency : data) {
     auto point = std::make_unique<base::Value>(base::Value::Type::DICTIONARY);
-    for (const auto& att : data_point) {
-      point->SetStringKey(att.first, att.second);
-    }
+    point->SetStringKey("symbol", currency.symbol);
+    point->SetDoubleKey("price", currency.price);
+    point->SetDoubleKey("percentChangeDay", currency.percentChangeDay);
+    point->SetDoubleKey("volumeDay", currency.volumeDay);
     result.Append(std::move(point));
   }
 
@@ -96,7 +97,7 @@ void FtxGetChartDataFunction::OnChartData(const FTXChartData& data) {
   for (const auto& data_point : data) {
     auto point = std::make_unique<base::Value>(base::Value::Type::DICTIONARY);
     for (const auto& att : data_point) {
-      point->SetStringKey(att.first, att.second);
+      point->SetDoubleKey(att.first, att.second);
     }
     result.Append(std::move(point));
   }
@@ -145,24 +146,15 @@ ExtensionFunction::ResponseAction FtxGetClientUrlFunction::Run() {
   return RespondNow(OneArgument(base::Value(client_url)));
 }
 
-ExtensionFunction::ResponseAction FtxGetAccessTokenFunction::Run() {
+ExtensionFunction::ResponseAction FtxDisconnectFunction::Run() {
   if (!IsFTXAPIAvailable(browser_context())) {
     return RespondNow(Error("Not available in Tor/incognito/guest profile"));
   }
 
   auto* service = GetFTXService(browser_context());
-  bool token_request = service->GetAccessToken(
-      base::BindOnce(&FtxGetAccessTokenFunction::OnCodeResult, this));
+  service->ClearAuth();
 
-  if (!token_request) {
-    return RespondNow(Error("Could not make request for access token"));
-  }
-
-  return RespondLater();
-}
-
-void FtxGetAccessTokenFunction::OnCodeResult(bool success) {
-  Respond(OneArgument(base::Value(success)));
+  return RespondNow(NoArguments());
 }
 
 ExtensionFunction::ResponseAction FtxGetAccountBalancesFunction::Run() {
@@ -187,7 +179,7 @@ void FtxGetAccountBalancesFunction::OnGetAccountBalances(
   base::Value result(base::Value::Type::DICTIONARY);
 
   for (const auto& balance : balances) {
-    result.SetStringKey(balance.first, balance.second);
+    result.SetDoubleKey(balance.first, balance.second);
   }
 
   Respond(TwoArguments(std::move(result), base::Value(auth_invalid)));

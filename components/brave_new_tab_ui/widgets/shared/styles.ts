@@ -26,6 +26,7 @@ interface StyleProps {
   href?: string
   inline?: boolean
   isActive?: boolean
+  isSelected?: boolean
   isAsset?: boolean
   isAuth?: boolean
   isDeposit?: boolean
@@ -49,6 +50,7 @@ interface StyleProps {
   $pr?: number | string
   $pb?: number | string
   $pl?: number | string
+  $gap?: number | string
   showContent?: boolean
   small?: boolean
   large?: boolean
@@ -63,12 +65,12 @@ interface StyleProps {
 
 function getTextStyle (p: StyleProps) {
   return [
-    ["weight", `font-weight: ${p.weight || (p.small ? '500' : 'normal')};`],
-    ["$fontSize", `font-size: ${(
+    ['weight', `font-weight: ${p.weight || (p.small ? '500' : 'normal')};`],
+    ['$fontSize', `font-size: ${(
         (p.$fontSize && `${p.$fontSize}px`) || (p.small ? '11px' : (p.large ? '19px' : '13px'))
     )};`],
-    ["center", `text-align: ${p.center ? 'center' : 'inherit'};`],
-    ["lineHeight", `line-height: ${p.lineHeight || 'normal'};]`]
+    ['center', `text-align: ${p.center ? 'center' : 'inherit'};`],
+    ['lineHeight', `line-height: ${p.lineHeight || 'normal'};]`]
   ].reduce((aggr, v) => {
     return p[v[0]] ? `${aggr}${v[1]}` : aggr
   }, '')
@@ -86,6 +88,7 @@ function getBoxStyle (p: StyleProps) {
     ['$mr', `margin-right: ${typeof p.$mr === 'number' ? `${p.$mr}px` : p.$mr};`],
     ['$mb', `margin-bottom: ${typeof p.$mb === 'number' ? `${p.$mb}px` : p.$mb};`],
     ['$ml', `margin-left: ${typeof p.$ml === 'number' ? `${p.$ml}px` : p.$ml};`],
+    ['$gap', `gap: ${typeof p.$gap === 'number' ? `${p.$gap}px` : p.$gap};`],
     ['isFullWidth', 'width: 100%;']
   ].reduce((aggr, v) => {
     return p[v[0]] ? `${aggr}${v[1]}` : aggr
@@ -124,6 +127,10 @@ export const Text = styled('p')<StyleProps>`
   filter: inherit;
 
   ${getBoxStyle}
+`
+
+export const LightText = styled(Text)`
+  color: #bbb;
 `
 
 export const BasicBox = styled('div')<StyleProps>`
@@ -166,18 +173,32 @@ export const FlexItem = styled('div')<StyleProps>`
 
 export const PlainButton = styled('button')<StyleProps>`
   display: ${p => p.inline ? 'inline-block' : 'block'};
+  cursor: pointer;
   background: none;
   border: none;
-  cursor: pointer;
-  color: ${p => getColor(p.textColor) || '#ffffff'};
+  padding: 0;
+  color: ${p => getColor(p.textColor) || '#fff'};
 
   &:focus {
     outline: 0;
   }
 
+  &:hover {
+    color: ${p => !p.isSelected && '#bbb'};
+  }
+
+  &:active {
+    transform: translateY(1px) translateX(1px);
+  }
+
   ${getTextStyle}
 
   ${getBoxStyle}
+`
+
+export const OptionButton = styled(PlainButton)<StyleProps>`
+  font-weight: 600;
+  color: ${p => p.isSelected ? getColor('white') : getColor('light')}
 `
 
 export const WidgetWrapper = styled('div')<StyleProps>`
@@ -268,7 +289,6 @@ export const ActionButton = styled('button')<StyleProps>`
   cursor: pointer;
   color: #ffffff;
   line-height: 1;
-  text-transform: uppercase;
 
   ${getBoxStyle}
 `
