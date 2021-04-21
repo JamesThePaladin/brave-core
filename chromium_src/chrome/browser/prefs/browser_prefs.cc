@@ -9,6 +9,7 @@
 #include "brave/browser/themes/brave_dark_mode_utils.h"
 #include "brave/common/pref_names.h"
 #include "brave/components/brave_sync/brave_sync_prefs.h"
+#include "brave/components/crypto_dot_com/browser/buildflags/buildflags.h"
 #include "brave/components/tor/buildflags/buildflags.h"
 #include "chrome/browser/profiles/profile.h"
 #include "components/gcm_driver/gcm_buildflags.h"
@@ -20,6 +21,10 @@
 
 #if BUILDFLAG(ENABLE_WIDEVINE)
 #include "brave/browser/widevine/widevine_utils.h"
+#endif
+
+#if BUILDFLAG(CRYPTO_DOT_COM_ENABLED)
+#include "brave/components/crypto_dot_com/browser/crypto_dot_com_pref_utils.h"
 #endif
 
 #define MigrateObsoleteProfilePrefs MigrateObsoleteProfilePrefs_ChromiumImpl
@@ -60,6 +65,11 @@ void MigrateObsoleteProfilePrefs(Profile* profile) {
 
   // Added 04/2021
   profile->GetPrefs()->ClearPref(kAlternativeSearchEngineProviderInTor);
+
+  // Added 03/2021
+#if BUILDFLAG(CRYPTO_DOT_COM_ENABLED)
+  crypto_dot_com::MigrateObsoletePrefs(profile->GetPrefs());
+#endif
 }
 
 // This method should be periodically pruned of year+ old migrations.
