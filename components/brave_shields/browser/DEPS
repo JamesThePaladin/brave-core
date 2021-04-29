@@ -39,6 +39,7 @@ specific_include_rules = {
     "+chrome/browser/profiles/profile.h",
     "+chrome/common/renderer_configuration.mojom.h",
     "+chrome/browser/extensions/extension_tab_util.h",
+    "+third_party/blink/public/common/associated_interfaces/associated_interface_provider.h",
   ],
   "brave_shields_web_contents_observer_android.cc": [
     "+brave/browser/android/brave_shields_content_settings.h",

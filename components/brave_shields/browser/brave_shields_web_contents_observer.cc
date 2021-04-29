@@ -15,7 +15,6 @@
 #include "brave/common/pref_names.h"
 #include "brave/components/brave_shields/browser/brave_shields_util.h"
 #include "brave/components/brave_shields/common/brave_shield_constants.h"
-#include "brave/content/common/frame_messages.h"
 #include "chrome/browser/content_settings/host_content_settings_map_factory.h"
 #include "chrome/browser/profiles/profile.h"
 #include "chrome/common/renderer_configuration.mojom.h"
@@ -35,6 +34,7 @@
 #include "extensions/buildflags/buildflags.h"
 #include "ipc/ipc_message_macros.h"
 #include "mojo/public/cpp/bindings/associated_remote.h"
+#include "third_party/blink/public/common/associated_interfaces/associated_interface_provider.h"
 
 #if BUILDFLAG(ENABLE_EXTENSIONS)
 #include "brave/common/extensions/api/brave_shields.h"
@@ -99,8 +99,9 @@ BraveShieldsWebContentsObserver::BraveShieldsWebContentsObserver(
 void BraveShieldsWebContentsObserver::RenderFrameCreated(
     RenderFrameHost* rfh) {
   if (rfh && allowed_script_origins_.size()) {
-    rfh->Send(new BraveFrameMsg_AllowScriptsOnce(
-          rfh->GetRoutingID(), allowed_script_origins_));
+    mojo::AssociatedRemote<brave_shields::mojom::BraveShields> shields_remote;
+    rfh->GetRemoteAssociatedInterfaces()->GetInterface(&shields_remote);
+    shields_remote->SetAllowScriptsFromOriginsOnce(allowed_script_origins_);
   }
 
   WebContents* web_contents = WebContents::FromRenderFrameHost(rfh);
@@ -270,9 +271,12 @@ void BraveShieldsWebContentsObserver::ReadyToCommitNavigation(
     }
   }
 
-  navigation_handle->GetWebContents()->SendToAllFrames(
-      new BraveFrameMsg_AllowScriptsOnce(
-        MSG_ROUTING_NONE, allowed_script_origins_));
+  auto render_frame_hosts = navigation_handle->GetWebContents()->GetAllFrames();
+  for (content::RenderFrameHost* rfh : render_frame_hosts) {
+    mojo::AssociatedRemote<brave_shields::mojom::BraveShields> shields_remote;
+    rfh->GetRemoteAssociatedInterfaces()->GetInterface(&shields_remote);
+    shields_remote->SetAllowScriptsFromOriginsOnce(allowed_script_origins_);
+  }
 }
 
 void BraveShieldsWebContentsObserver::AllowScriptsOnce(
