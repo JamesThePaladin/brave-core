@@ -1,7 +1,7 @@
 import * as React from 'react'
 
 // Components
-import { ConnectWithSite, ConnectedPanel, Panel } from '../components/extension'
+import { ConnectWithSite, ConnectedPanel, Panel, WelcomePanel } from '../components/extension'
 import { AppList } from '../components/shared'
 import { WalletAccountType, PanelTypes, AppObjectType, AppsListType } from '../constants/types'
 import { AppsList } from '../options/apps-list-options'
@@ -182,4 +182,25 @@ export const _ConnectedPanel = () => {
 
 _ConnectedPanel.story = {
   name: 'Connected With Site'
+}
+
+export const _SetupWallet = () => {
+
+  const onRestore = () => {
+    alert('Will navigate to full wallet restore page')
+  }
+
+  const onSetup = () => {
+    alert('Will navigate to full wallet onboarding page')
+  }
+
+  return (
+    <StyledExtensionWrapper>
+      <WelcomePanel onRestore={onRestore} onSetup={onSetup} />
+    </StyledExtensionWrapper>
+  )
+}
+
+_SetupWallet.story = {
+  name: 'Setup New Wallet'
 }
