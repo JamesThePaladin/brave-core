@@ -122,6 +122,11 @@ void Wallet::AuthorizeWallet(
     return;
   }
 
+  if (wallet_type == constant::kWalletGemini) {
+    ledger_->gemini()->WalletAuthorization(args, callback);
+    return;
+  }
+
   NOTREACHED();
   callback(type::Result::LEDGER_ERROR, {});
 }
