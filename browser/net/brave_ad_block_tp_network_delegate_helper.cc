@@ -114,6 +114,7 @@ class AdblockCnameResolveHostClient : public network::mojom::ResolveHostClient {
       const ResponseCallback& next_callback,
       scoped_refptr<base::SequencedTaskRunner> task_runner,
       std::shared_ptr<BraveRequestInfo> ctx) {
+    DCHECK(ctx->browser_context);
     cb_ = base::BindOnce(&ShouldBlockAdWithOptionalCname, task_runner,
                          std::move(next_callback), ctx);
 
@@ -193,10 +194,9 @@ void OnBeforeURLRequestAdBlockTP(const ResponseCallback& next_callback,
   scoped_refptr<base::SequencedTaskRunner> task_runner =
       g_brave_browser_process->ad_block_service()->GetTaskRunner();
 
-  DCHECK(ctx->browser_context);
   // DoH or standard DNS quries won't be routed through Tor, so we need to skip
   // it.
-  if (ctx->browser_context->IsTor()) {
+  if (!ctx->browser_context || ctx->browser_context->IsTor()) {
     ShouldBlockAdWithOptionalCname(task_runner, std::move(next_callback), ctx,
                                    base::nullopt);
   } else {
