@@ -37,7 +37,7 @@ void RemoveTrackableSecurityHeadersForThirdParty(
         new net::HttpResponseHeaders(original_response_headers->raw_headers());
   }
   for (auto header : *TrackableSecurityHeaders()) {
-    (*override_response_headers)->RemoveHeader(header.as_string());
+    (*override_response_headers)->RemoveHeader(std::string(header));
   }
 }
 
