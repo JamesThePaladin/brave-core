@@ -67,9 +67,13 @@ class IpfsImportWorkerBase {
   void ImportFolder(const base::FilePath folder_path);
 
  protected:
-
   scoped_refptr<network::SharedURLLoaderFactory> GetUrlLoaderFactory();
-
+  content::BrowserContext* GetBrowserContext();
+  
+  base::WeakPtr<IpfsImportWorkerBase> GetWeakPtr() {
+    return weak_factory_.GetWeakPtr();
+  }
+  
   virtual void NotifyImportCompleted(ipfs::ImportState state);
 
  private:
