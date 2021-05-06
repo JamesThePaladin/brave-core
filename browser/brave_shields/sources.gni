@@ -3,6 +3,8 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
 # You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+import("//brave/components/debounce/browser/buildflags/buildflags.gni")
+
 brave_browser_brave_shields_sources = [
   "//brave/browser/brave_shields/ad_block_pref_service_factory.cc",
   "//brave/browser/brave_shields/ad_block_pref_service_factory.h",
@@ -19,3 +21,8 @@ brave_browser_brave_shields_deps = [
   "//components/content_settings/core/browser",
   "//components/keyed_service/content",
 ]
+
+if (enable_debounce) {
+  brave_browser_brave_shields_deps +=
+  [ "//brave/components/debounce/browser" ]
+}
