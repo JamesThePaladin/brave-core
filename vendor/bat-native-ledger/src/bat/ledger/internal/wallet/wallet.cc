@@ -146,6 +146,12 @@ void Wallet::DisconnectWallet(
     return;
   }
 
+  if (wallet_type == constant::kWalletGemini) {
+    ledger_->bitflyer()->DisconnectWallet(true);
+    callback(type::Result::LEDGER_OK);
+    return;
+  }
+
   NOTREACHED();
   callback(type::Result::LEDGER_OK);
 }
@@ -202,6 +208,7 @@ void Wallet::GetAnonWalletStatus(ledger::ResultCallback callback) {
 void Wallet::DisconnectAllWallets(ledger::ResultCallback callback) {
   DisconnectWallet(constant::kWalletUphold, [](const type::Result result) {});
   DisconnectWallet(constant::kWalletBitflyer, [](const type::Result result) {});
+  DisconnectWallet(constant::kWalletGemini, [](const type::Result result) {});
   callback(type::Result::LEDGER_OK);
 }
 
