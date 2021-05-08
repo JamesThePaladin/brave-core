@@ -114,7 +114,6 @@ class AdblockCnameResolveHostClient : public network::mojom::ResolveHostClient {
       const ResponseCallback& next_callback,
       scoped_refptr<base::SequencedTaskRunner> task_runner,
       std::shared_ptr<BraveRequestInfo> ctx) {
-    DCHECK(ctx->browser_context);
     cb_ = base::BindOnce(&ShouldBlockAdWithOptionalCname, task_runner,
                          std::move(next_callback), ctx);
 
@@ -133,11 +132,6 @@ class AdblockCnameResolveHostClient : public network::mojom::ResolveHostClient {
     if (secure_dns_config.mode() == net::SecureDnsMode::kSecure)
       optional_parameters->source = net::HostResolverSource::DNS;
 
-    network::mojom::NetworkContext* network_context =
-        content::BrowserContext::GetDefaultStoragePartition(
-            ctx->browser_context)
-            ->GetNetworkContext();
-
     start_time_ = base::TimeTicks::Now();
 
     if (g_testing_host_resolver) {
@@ -145,6 +139,13 @@ class AdblockCnameResolveHostClient : public network::mojom::ResolveHostClient {
           net::HostPortPair::FromURL(ctx->request_url), network_isolation_key,
           std::move(optional_parameters), receiver_.BindNewPipeAndPassRemote());
     } else {
+      DCHECK(ctx->browser_context);
+
+      network::mojom::NetworkContext* network_context =
+          content::BrowserContext::GetDefaultStoragePartition(
+              ctx->browser_context)
+              ->GetNetworkContext();
+
       network_context->ResolveHost(
           net::HostPortPair::FromURL(ctx->request_url), network_isolation_key,
           std::move(optional_parameters), receiver_.BindNewPipeAndPassRemote());
