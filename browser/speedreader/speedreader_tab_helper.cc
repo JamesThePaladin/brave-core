@@ -15,7 +15,7 @@
 
 namespace speedreader {
 
-SpeedreaderTabHelper::~SpeedreaderTabHelper() = default;
+peedreaderTabHelper::~SpeedreaderTabHelper() = default;
 
 SpeedreaderTabHelper::SpeedreaderTabHelper(content::WebContents* web_contents)
     : content::WebContentsObserver(web_contents) {}
